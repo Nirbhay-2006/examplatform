@@ -1,0 +1,13 @@
+Alternative SMTP Configurations:
+
+1. Outlook/Hotmail:
+   "SmtpServer": "smtp-mail.outlook.com",
+   "SmtpPort": 587,
+
+2. Yahoo:
+   "SmtpServer": "smtp.mail.yahoo.com",
+   "SmtpPort": 587,
+
+3. For testing (no real emails):
+   "SmtpServer": "smtp.ethereal.email",
+   "SmtpPort": 587,
