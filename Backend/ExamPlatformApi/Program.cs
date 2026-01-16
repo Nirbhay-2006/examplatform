@@ -36,6 +36,13 @@ builder.Services.AddSingleton<IResultRepository>(sp =>
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IFileParserService, FileParserService>();
+builder.Services.AddSingleton<ISystemConfigRepository>(sp => 
+    new SystemConfigRepository(sp.GetRequiredService<MongoDB.Driver.IMongoDatabase>()));
+builder.Services.AddSingleton<IAuditService>(sp => 
+    new AuditService(sp.GetRequiredService<MongoDB.Driver.IMongoDatabase>(), sp.GetRequiredService<ILogger<AuditService>>()));
+builder.Services.AddScoped<IAntiCheatService, AntiCheatService>();
+builder.Services.AddMemoryCache(); // For Rate Limiting
+builder.Services.AddHostedService<BackupService>(); // Periodic Backups
 
 // JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
@@ -140,6 +147,8 @@ builder.Services.AddSingleton<MongoDB.Driver.IMongoDatabase>(serviceProvider =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
+app.UseMiddleware<SecurityHeadersMiddleware>(); // Security Headers first
+app.UseMiddleware<RateLimitingMiddleware>(); // Rate Limiting next
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

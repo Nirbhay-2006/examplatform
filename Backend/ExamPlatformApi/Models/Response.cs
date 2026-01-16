@@ -27,6 +27,9 @@ public class Response
     [BsonElement("violationCount")]
     public int ViolationCount { get; set; } = 0;
 
+    [BsonElement("cheatingScore")]
+    public int CheatingScore { get; set; } = 0;
+
     [BsonElement("isAutoSubmitted")]
     public bool IsAutoSubmitted { get; set; } = false;
 
@@ -47,4 +50,7 @@ public class Answer
 
     [BsonElement("marksObtained")]
     public int MarksObtained { get; set; } = 0;
+
+    [BsonElement("submittedAt")]
+    public DateTime SubmittedAt { get; set; } = DateTime.UtcNow;
 }

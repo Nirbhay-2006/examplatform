@@ -12,13 +12,21 @@ public class AdminController : ControllerBase
 {
     private readonly IUserRepository _userRepository;
     private readonly IExamRepository _examRepository;
-    private readonly IPaymentRepository _paymentRepository;
+    private readonly ISystemConfigRepository _configRepository;
+    private readonly IAuditService _auditService;
 
-    public AdminController(IUserRepository userRepository, IExamRepository examRepository, IPaymentRepository paymentRepository)
+    public AdminController(
+        IUserRepository userRepository, 
+        IExamRepository examRepository, 
+        IPaymentRepository paymentRepository,
+        ISystemConfigRepository configRepository,
+        IAuditService auditService)
     {
         _userRepository = userRepository;
         _examRepository = examRepository;
         _paymentRepository = paymentRepository;
+        _configRepository = configRepository;
+        _auditService = auditService;
     }
 
     [HttpGet("users")]
@@ -87,5 +95,32 @@ public class AdminController : ControllerBase
         };
 
         return Ok(new ApiResponse<object> { Success = true, Data = stats });
+    }
+
+    [HttpGet("config")]
+    public async Task<ActionResult<ApiResponse<Models.SystemConfig>>> GetSystemConfig()
+    {
+        var config = await _configRepository.GetConfigAsync();
+        return Ok(new ApiResponse<Models.SystemConfig> { Success = true, Data = config });
+    }
+
+    [HttpPut("config")]
+    public async Task<ActionResult<ApiResponse<object>>> UpdateSystemConfig([FromBody] Models.SystemConfig config)
+    {
+        // Ensure ID is preserved or handled by repo
+        await _configRepository.UpdateConfigAsync(config);
+        
+        // Audit log
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "admin";
+        await _auditService.LogAsync("UPDATE_CONFIG", userId, "Updated system configuration", HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown");
+
+        return Ok(new ApiResponse<object> { Success = true, Message = "Configuration updated successfully" });
+    }
+
+    [HttpGet("audit-logs")]
+    public async Task<ActionResult<ApiResponse<List<Models.AuditLog>>>> GetAuditLogs([FromQuery] int limit = 100)
+    {
+        var logs = await _auditService.GetLogsAsync(limit);
+        return Ok(new ApiResponse<List<Models.AuditLog>> { Success = true, Data = logs });
     }
 }
