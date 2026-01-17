@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ExamPlatform.API.DTOs;
 using ExamPlatform.API.Repositories;
+using ExamPlatform.API.Services;
 
 namespace ExamPlatform.API.Controllers;
 
@@ -12,19 +13,20 @@ public class AdminController : ControllerBase
 {
     private readonly IUserRepository _userRepository;
     private readonly IExamRepository _examRepository;
+    // private readonly IPaymentRepository _paymentRepository;
     private readonly ISystemConfigRepository _configRepository;
     private readonly IAuditService _auditService;
 
     public AdminController(
         IUserRepository userRepository, 
         IExamRepository examRepository, 
-        IPaymentRepository paymentRepository,
+        // IPaymentRepository paymentRepository,
         ISystemConfigRepository configRepository,
         IAuditService auditService)
     {
         _userRepository = userRepository;
         _examRepository = examRepository;
-        _paymentRepository = paymentRepository;
+        // _paymentRepository = paymentRepository;
         _configRepository = configRepository;
         _auditService = auditService;
     }

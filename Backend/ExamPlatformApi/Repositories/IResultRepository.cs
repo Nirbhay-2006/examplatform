@@ -7,4 +7,5 @@ public interface IResultRepository
     Task CreateAsync(Result result);
     Task<Result?> GetByExamAndStudentAsync(string examId, string studentId);
     Task<List<Result>> GetByStudentIdAsync(string studentId);
+    Task<List<Result>> GetByExamIdAsync(string examId);
 }

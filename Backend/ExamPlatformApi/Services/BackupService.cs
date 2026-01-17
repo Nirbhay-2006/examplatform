@@ -74,7 +74,7 @@ public class BackupService : BackgroundService
                     
                     for (int j = 0; j < documents.Count; j++)
                     {
-                        var json = documents[j].ToJson(new MongoDB.Bson.IO.JsonWriterSettings { OutputMode = MongoDB.Bson.IO.JsonOutputMode.Strict });
+                        var json = documents[j].ToJson(new MongoDB.Bson.IO.JsonWriterSettings { OutputMode = MongoDB.Bson.IO.JsonOutputMode.Shell });
                         await writer.WriteAsync(json);
                         if (j < documents.Count - 1) await writer.WriteAsync(",");
                     }

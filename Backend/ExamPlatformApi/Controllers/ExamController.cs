@@ -23,6 +23,8 @@ public class ExamController : ControllerBase
     private readonly IFileParserService _fileParserService;
     private readonly IAntiCheatService _antiCheatService;
     private readonly ISystemConfigRepository _configRepository;
+    private readonly IAuditService _auditService;
+    private readonly IEmailService _emailService;
     private readonly ILogger<ExamController> _logger;
 
     public ExamController(
@@ -34,6 +36,8 @@ public class ExamController : ControllerBase
         IFileParserService fileParserService,
         IAntiCheatService antiCheatService,
         ISystemConfigRepository configRepository,
+        IAuditService auditService,
+        IEmailService emailService,
         ILogger<ExamController> logger)
     {
         _examRepository = examRepository;
@@ -44,6 +48,8 @@ public class ExamController : ControllerBase
         _fileParserService = fileParserService;
         _antiCheatService = antiCheatService;
         _configRepository = configRepository;
+        _auditService = auditService;
+        _emailService = emailService;
         _logger = logger;
     }
 
@@ -72,27 +78,45 @@ public class ExamController : ControllerBase
                 });
             }
 
+            // Subscription Enforcement
+            if (GetSubscriptionType() != "paid")
+            {
+                var config = await _configRepository.GetConfigAsync();
+                var currentExams = await _examRepository.GetByTeacherIdAsync(GetUserId());
+                if (currentExams.Count >= config.SubscriptionLimits.FreePlanMaxExams)
+                {
+                    return StatusCode(403, new ApiResponse<Exam>
+                    {
+                        Success = false,
+                        Message = $"Free plan limit reached. You can only create {config.SubscriptionLimits.FreePlanMaxExams} exams. Please upgrade to Premium."
+                    });
+                }
+            }
+
             _logger.LogInformation("Creating exam: {Title} by user: {UserId}", request.Title, GetUserId());
 
-        var exam = new Exam
-        {
-            Title = request.Title,
-            Description = request.Description,
-            TeacherId = GetUserId(),
-            Duration = request.Duration,
-            TotalMarks = request.TotalMarks,
-            PassingMarks = request.PassingMarks,
-            StartTime = request.StartTime,
-            EndTime = request.EndTime,
-            IsPaid = request.IsPaid,
-            MaxViolations = request.MaxViolations
-        };
+            var exam = new Exam
+            {
+                Title = request.Title,
+                Description = request.Description,
+                TeacherId = GetUserId(),
+                Duration = request.Duration,
+                TotalMarks = request.TotalMarks,
+                PassingMarks = request.PassingMarks,
+                StartTime = request.StartTime,
+                EndTime = request.EndTime,
+                IsPaid = request.IsPaid,
+                MaxViolations = request.MaxViolations
+            };
 
-        await _examRepository.CreateAsync(exam);
+            await _examRepository.CreateAsync(exam);
+            
+            // Audit Log
+            await _auditService.LogAsync("CREATE_EXAM", GetUserId(), $"Created exam: {exam.Title} ({exam.Id})", HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown");
             
             _logger.LogInformation("Exam created successfully: {ExamId}, Title: {Title}", exam.Id, exam.Title);
             
-        return Ok(new ApiResponse<Exam> { Success = true, Message = "Exam created successfully", Data = exam });
+            return Ok(new ApiResponse<Exam> { Success = true, Message = "Exam created successfully", Data = exam });
         }
         catch (Exception ex)
         {
@@ -249,9 +273,20 @@ public class ExamController : ControllerBase
                 });
             }
 
-            // check subscription limits for exams count? 
-            // We implemented student limit, but typically paid plans also have unlimited exams vs limited for free.
-            // For now, focusing on the core request.
+            // Subscription Enforcement
+            if (GetSubscriptionType() != "paid")
+            {
+                var config = await _configRepository.GetConfigAsync();
+                var currentExams = await _examRepository.GetByTeacherIdAsync(GetUserId());
+                if (currentExams.Count >= config.SubscriptionLimits.FreePlanMaxExams)
+                {
+                    return StatusCode(403, new ApiResponse<Exam>
+                    {
+                        Success = false,
+                        Message = $"Free plan limit reached. You can only create {config.SubscriptionLimits.FreePlanMaxExams} exams. Please upgrade to Premium."
+                    });
+                }
+            }
 
             _logger.LogInformation("Creating exam from file: {Title} by user: {UserId}", request.Title, GetUserId());
 
@@ -364,6 +399,21 @@ public class ExamController : ControllerBase
 
         exam.AssignedStudents.AddRange(studentIds);
         await _examRepository.UpdateAsync(exam);
+        
+        // Send Notification Emails
+        foreach (var studentId in studentIds)
+        {
+             var student = await _userRepository.GetByIdAsync(studentId);
+             if (student != null)
+             {
+                 // Fire and forget email task to avoid blocking response
+                 _ = _emailService.SendExamAssignmentEmailAsync(student.Email, student.Name, exam.Title, exam.StartTime);
+             }
+        }
+
+        // Audit Log
+        await _auditService.LogAsync("ASSIGN_EXAM", GetUserId(), $"Assigned {studentIds.Count} students to exam: {exam.Title} ({exam.Id})", HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown");
+        
         return Ok(new ApiResponse<object> { Success = true, Message = "Exam assigned successfully" });
     }
 
@@ -406,6 +456,10 @@ public class ExamController : ControllerBase
         };
 
         await _responseRepository.CreateAsync(response);
+        
+        // Audit Log
+        await _auditService.LogAsync("START_EXAM", GetUserId(), $"Started exam: {exam.Title} ({exam.Id})", HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown");
+        
         return Ok(new ApiResponse<Response> { Success = true, Message = "Exam started", Data = response });
     }
 
@@ -585,6 +639,10 @@ public class ExamController : ControllerBase
         }
 
         await _responseRepository.UpdateAsync(response);
+        
+        // Audit Log
+        await _auditService.LogAsync("SUBMIT_EXAM", GetUserId(), $"Submitted exam: {examId}", HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown");
+        
         return Ok(new ApiResponse<object> { Success = true, Message = "Exam submitted successfully" });
     }
 
@@ -661,6 +719,14 @@ public class ExamController : ControllerBase
             }
 
             await _responseRepository.UpdateAsync(response);
+            
+            // Audit Log
+            await _auditService.LogAsync(
+                "EXAM_VIOLATION", 
+                GetUserId(), 
+                $"Violation reported: {request.ViolationType} in exam {examId}. AutoSubmitted: {response.IsAutoSubmitted}", 
+                HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown"
+            );
             
             return Ok(new ApiResponse<object> 
             { 

@@ -38,4 +38,9 @@ public class ViolationRepository : IViolationRepository
     {
         return (int)await _violations.CountDocumentsAsync(v => v.ExamId == examId && v.StudentId == studentId);
     }
+
+    public async Task<List<Violation>> GetByExamIdAsync(string examId)
+    {
+        return await _violations.Find(v => v.ExamId == examId).ToListAsync();
+    }
 }

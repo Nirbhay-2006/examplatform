@@ -1,3 +1,4 @@
+using System;
 using MailKit.Net.Smtp;
 using MimeKit;
 using Microsoft.Extensions.Options;
@@ -120,6 +121,96 @@ public class EmailService : IEmailService
         {
             _logger.LogError(ex, "Failed to send password reset email to {Email}. Error: {ErrorMessage}", toEmail, ex.Message);
             throw;
+        }
+    }
+    public async Task SendExamAssignmentEmailAsync(string toEmail, string name, string examTitle, DateTime startTime)
+    {
+        try
+        {
+            _logger.LogInformation("Attempting to send exam assignment email to {Email}", toEmail);
+
+            if (string.IsNullOrEmpty(_emailSettings.Password) || string.IsNullOrEmpty(_emailSettings.SenderEmail))
+            {
+                _logger.LogWarning("Email settings not configured. Skipping email to {Email}", toEmail);
+                return;
+            }
+
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress(_emailSettings.SenderName, _emailSettings.SenderEmail));
+            message.To.Add(new MailboxAddress(name, toEmail));
+            message.Subject = $"Exam Assigned: {examTitle} - Exam Platform";
+
+            message.Body = new TextPart("html")
+            {
+                Text = $@"
+                    <html>
+                    <body>
+                        <h2>New Exam Assigned!</h2>
+                        <p>Hi {name},</p>
+                        <p>You have been assigned to a new exam: <strong>{examTitle}</strong></p>
+                        <p><strong>Start Time:</strong> {startTime.ToLocalTime()}</p>
+                        <p>Please login to your dashboard to view details.</p>
+                        <p>Good luck!</p>
+                    </body>
+                    </html>"
+            };
+
+            using var client = new SmtpClient();
+            await client.ConnectAsync(_emailSettings.SmtpServer, _emailSettings.SmtpPort, MailKit.Security.SecureSocketOptions.StartTls);
+            await client.AuthenticateAsync(_emailSettings.SenderEmail, _emailSettings.Password);
+            await client.SendAsync(message);
+            await client.DisconnectAsync(true);
+
+            _logger.LogInformation("Exam assignment email sent successfully to {Email}", toEmail);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send exam assignment email to {Email}", toEmail);
+        }
+    }
+
+    public async Task SendResultPublishedEmailAsync(string toEmail, string name, string examTitle, double percentage)
+    {
+        try
+        {
+            _logger.LogInformation("Attempting to send result published email to {Email}", toEmail);
+
+            if (string.IsNullOrEmpty(_emailSettings.Password) || string.IsNullOrEmpty(_emailSettings.SenderEmail))
+            {
+                _logger.LogWarning("Email settings not configured. Skipping email to {Email}", toEmail);
+                return;
+            }
+
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress(_emailSettings.SenderName, _emailSettings.SenderEmail));
+            message.To.Add(new MailboxAddress(name, toEmail));
+            message.Subject = $"Results Published: {examTitle} - Exam Platform";
+
+            message.Body = new TextPart("html")
+            {
+                Text = $@"
+                    <html>
+                    <body>
+                        <h2>Exam Results Available!</h2>
+                        <p>Hi {name},</p>
+                        <p>The results for <strong>{examTitle}</strong> have been published.</p>
+                        <p><strong>Your Score:</strong> {percentage:F2}%</p>
+                        <p>Please login to your dashboard to view the full report.</p>
+                    </body>
+                    </html>"
+            };
+
+            using var client = new SmtpClient();
+            await client.ConnectAsync(_emailSettings.SmtpServer, _emailSettings.SmtpPort, MailKit.Security.SecureSocketOptions.StartTls);
+            await client.AuthenticateAsync(_emailSettings.SenderEmail, _emailSettings.Password);
+            await client.SendAsync(message);
+            await client.DisconnectAsync(true);
+
+            _logger.LogInformation("Result published email sent successfully to {Email}", toEmail);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send result published email to {Email}", toEmail);
         }
     }
 }

@@ -21,6 +21,9 @@ public class Response
     [BsonElement("startedAt")]
     public DateTime StartedAt { get; set; } = DateTime.UtcNow;
 
+    [BsonElement("startTime")]
+    public DateTime StartTime { get; set; } = DateTime.UtcNow;
+
     [BsonElement("submittedAt")]
     public DateTime? SubmittedAt { get; set; }
 

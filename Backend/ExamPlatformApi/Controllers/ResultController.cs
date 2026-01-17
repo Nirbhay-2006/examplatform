@@ -4,6 +4,7 @@ using System.Security.Claims;
 using ExamPlatform.API.DTOs;
 using ExamPlatform.API.Models;
 using ExamPlatform.API.Repositories;
+using ExamPlatform.API.Services;
 
 namespace ExamPlatform.API.Controllers;
 
@@ -16,17 +17,23 @@ public class ResultController : ControllerBase
     private readonly IResponseRepository _responseRepository;
     private readonly IExamRepository _examRepository;
     private readonly IQuestionRepository _questionRepository;
+    private readonly IUserRepository _userRepository;
+    private readonly IEmailService _emailService;
 
     public ResultController(
         IResultRepository resultRepository,
         IResponseRepository responseRepository,
         IExamRepository examRepository,
-        IQuestionRepository questionRepository)
+        IQuestionRepository questionRepository,
+        IUserRepository userRepository,
+        IEmailService emailService)
     {
         _resultRepository = resultRepository;
         _responseRepository = responseRepository;
         _examRepository = examRepository;
         _questionRepository = questionRepository;
+        _userRepository = userRepository;
+        _emailService = emailService;
     }
 
     private string GetUserId() => User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "";
@@ -70,6 +77,13 @@ public class ResultController : ControllerBase
             await _resultRepository.CreateAsync(result);
             response.Status = "evaluated";
             await _responseRepository.UpdateAsync(response);
+
+            // Send Result Notification
+            var student = await _userRepository.GetByIdAsync(response.StudentId);
+            if (student != null)
+            {
+                _ = _emailService.SendResultPublishedEmailAsync(student.Email, student.Name, exam.Title, percentage);
+            }
         }
 
         exam.IsPublished = true;

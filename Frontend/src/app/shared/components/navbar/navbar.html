@@ -1,0 +1,77 @@
+<nav class="navbar navbar-expand-lg fixed-top glass-panel-nav border-bottom-0 py-3">
+    <div class="container">
+        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="#">
+            <div class="icon-shape bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                style="width: 32px; height: 32px;">
+                <i class="bi bi-mortarboard-fill small"></i>
+            </div>
+            <span class="text-gradient">ExamNest</span>
+        </a>
+
+        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center gap-lg-3">
+                <li class="nav-item">
+                    <a class="nav-link fw-medium" routerLinkActive="active"
+                        [routerLink]="currentUser?.role === 'student' ? '/student/dashboard' : '/admin/dashboard'">
+                        Dashboard
+                    </a>
+                </li>
+
+                @if (currentUser?.role === 'teacher' || currentUser?.role === 'admin') {
+                <li class="nav-item">
+                    <a class="nav-link fw-medium" routerLinkActive="active" routerLink="/admin/manage-exams">Manage
+                        Exams</a>
+                </li>
+                }
+                @else {
+                <li class="nav-item">
+                    <a class="nav-link fw-medium" routerLinkActive="active" routerLink="/student/exams">Exams</a>
+                </li>
+                }
+
+                @if (!isPremium) {
+                <li class="nav-item">
+                    <button class="btn btn-sm btn-gradient-primary rounded-pill px-3" (click)="openSubscriptionModal()">
+                        <i class="bi bi-star-fill me-1"></i> Upgrade
+                    </button>
+                </li>
+                } @else {
+                <li class="nav-item">
+                    <span class="badge bg-warning text-dark rounded-pill px-3"><i class="bi bi-stars"></i>
+                        Premium</span>
+                </li>
+                }
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button"
+                        data-bs-toggle="dropdown">
+                        <div class="avatar bg-light rounded-circle d-flex align-items-center justify-content-center text-primary fw-bold"
+                            style="width: 32px; height: 32px;">
+                            {{ currentUser?.name ? currentUser.name.substring(0,2).toUpperCase() : 'US' }}
+                        </div>
+                        <span class="d-none d-lg-inline">{{ currentUser?.name || 'User' }}</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-3 mt-2 p-2">
+                        <li><a class="dropdown-item rounded-2" href="#"><i class="bi bi-person me-2"></i> Profile</a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><button class="dropdown-item rounded-2 text-danger" (click)="logout()"><i
+                                    class="bi bi-box-arrow-right me-2"></i> Sign Out</button></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<app-subscription-modal *ngIf="showSubscriptionModal" (close)="showSubscriptionModal = false"></app-subscription-modal>
+
+<!-- Spacer to prevent content from hiding behind fixed navbar -->
+<div style="height: 80px;"></div>

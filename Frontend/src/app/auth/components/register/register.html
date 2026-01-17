@@ -1,0 +1,86 @@
+<div
+    class="login-container d-flex align-items-center justify-content-center min-vh-100 position-relative overflow-hidden">
+    <!-- Animated Decoration Circles (reusing class for consistency) -->
+    <div class="decoration-circle circle-1" style="background: #10b981; top: auto; bottom: -50px; left: -50px;"></div>
+    <div class="decoration-circle circle-2" style="background: #6366f1; top: -50px; right: -50px; bottom: auto;"></div>
+
+    <div class="container position-relative z-2">
+        <div class="row justify-content-center">
+            <div class="col-md-7 col-lg-6 col-xl-5">
+                <div class="card glass-panel border-0 animate__animated animate__fadeInUp">
+                    <div class="card-body p-5">
+                        <div class="text-center mb-5">
+                            <h1 class="h3 fw-bold text-gradient mb-2">Create Account</h1>
+                            <p class="text-muted small">Join ExamNest today</p>
+                        </div>
+
+                        <form (ngSubmit)="onSubmit()">
+                            <div *ngIf="error"
+                                class="alert alert-danger small p-2 mb-3 bg-danger-subtle text-danger border-0 rounded-3">
+                                <i class="bi bi-exclamation-circle-fill me-2"></i>{{ error }}
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="firstName" placeholder="First Name"
+                                            [(ngModel)]="user.firstName" name="firstName" required>
+                                        <label for="firstName">First Name</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="lastName" placeholder="Last Name"
+                                            [(ngModel)]="user.lastName" name="lastName" required>
+                                        <label for="lastName">Last Name</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="email" class="form-control" id="email" placeholder="name@example.com"
+                                    [(ngModel)]="user.email" name="email" required>
+                                <label for="email">Email address</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="password" class="form-control" id="password" placeholder="Password"
+                                    [(ngModel)]="user.password" name="password" required>
+                                <label for="password">Password</label>
+                            </div>
+
+                            <div class="form-floating mb-4">
+                                <input type="password" class="form-control" id="confirmPassword"
+                                    placeholder="Confirm Password" [(ngModel)]="user.confirmPassword"
+                                    name="confirmPassword" required>
+                                <label for="confirmPassword">Confirm Password</label>
+                            </div>
+
+                            <div class="form-check mb-4">
+                                <input class="form-check-input" type="checkbox" value="" id="terms" required>
+                                <label class="form-check-label small text-muted" for="terms">
+                                    I agree to the <a href="#" class="text-primary text-decoration-none">Terms of
+                                        Service</a> and <a href="#" class="text-primary text-decoration-none">Privacy
+                                        Policy</a>
+                                </label>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary-gradient w-100 py-3 rounded-3 fw-semibold mb-4"
+                                [disabled]="isLoading">
+                                <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status"
+                                    aria-hidden="true"></span>
+                                <span *ngIf="!isLoading">Sign Up <i class="bi bi-person-plus ms-2"></i></span>
+                            </button>
+
+                            <div class="text-center">
+                                <span class="text-muted small">Already have an account?</span>
+                                <a routerLink="/auth/login"
+                                    class="text-primary text-decoration-none small fw-semibold ms-1">Sign In</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

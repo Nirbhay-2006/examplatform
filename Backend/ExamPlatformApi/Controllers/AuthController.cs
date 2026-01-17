@@ -15,17 +15,20 @@ public class AuthController : ControllerBase
     private readonly IUserRepository _userRepository;
     private readonly IEmailService _emailService;
     private readonly IJwtService _jwtService;
+    private readonly IAuditService _auditService;
     private readonly ILogger<AuthController> _logger;
 
     public AuthController(
         IUserRepository userRepository, 
         IEmailService emailService, 
         IJwtService jwtService,
+        IAuditService auditService,
         ILogger<AuthController> logger)
     {
         _userRepository = userRepository;
         _emailService = emailService;
         _jwtService = jwtService;
+        _auditService = auditService;
         _logger = logger;
     }
 
@@ -71,6 +74,9 @@ public class AuthController : ControllerBase
 
             await _userRepository.CreateAsync(user);
             await _emailService.SendOtpEmailAsync(user.Email, user.Name, otpCode);
+
+            // Audit Log
+            await _auditService.LogAsync("USER_REGISTER", user.Id ?? "new_user", $"User registered: {user.Email} as {user.Role}", HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown");
 
             _logger.LogInformation("User registered successfully: {Email}, Role: {Role}", user.Email, user.Role);
 
@@ -122,6 +128,9 @@ public class AuthController : ControllerBase
             user.OtpCode = null;
             user.OtpExpiry = null;
             await _userRepository.UpdateAsync(user);
+
+            // Audit Log
+            await _auditService.LogAsync("USER_VERIFY", user.Id!, $"User verified email: {user.Email}", HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown");
 
             _logger.LogInformation("Email verified successfully: {Email}", request.Email);
 
@@ -185,6 +194,9 @@ public class AuthController : ControllerBase
                 Role = user.Role,
                 SubscriptionType = user.SubscriptionType
             };
+
+            // Audit Log
+            await _auditService.LogAsync("USER_LOGIN", user.Id!, $"User logged in: {user.Email}", HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown");
 
             _logger.LogInformation("Login successful for email: {Email}, Role: {Role}", user.Email, user.Role);
 
@@ -329,6 +341,9 @@ public class AuthController : ControllerBase
             user.OtpCode = null;
             user.OtpExpiry = null;
             await _userRepository.UpdateAsync(user);
+
+            // Audit Log
+            await _auditService.LogAsync("USER_PASSWORD_RESET", user.Id!, $"User reset password: {user.Email}", HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown");
 
             _logger.LogInformation("Password reset successful for email: {Email}", request.Email);
 

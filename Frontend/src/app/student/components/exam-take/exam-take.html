@@ -1,0 +1,116 @@
+@if (isLoading) {
+<div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <div class="ms-3">Starting Exam Secure Environment...</div>
+</div>
+} @else {
+<div class="container-fluid vh-100 d-flex flex-column bg-light user-select-none">
+    <!-- Header -->
+    <header class="bg-white shadow-sm p-3 d-flex justify-content-between align-items-center">
+        <h5 class="m-0">Exam Session</h5>
+
+        <div class="d-flex align-items-center gap-4">
+            <div class="d-flex align-items-center text-danger">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>Violations: {{violationCount}} / {{maxViolations}}</strong>
+            </div>
+
+            <div class="timer bg-dark text-white px-3 py-1 rounded font-monospace fs-5">
+                <i class="bi bi-stopwatch me-2"></i>{{formatTime(timeRemaining)}}
+            </div>
+
+            <button class="btn btn-outline-danger btn-sm" (click)="submitExam()" [disabled]="isSubmitting">
+                Submit Exam
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="flex-grow-1 container py-4">
+        <div class="row h-100">
+            <!-- Question Area -->
+            <div class="col-lg-9 d-flex flex-column">
+                <div class="card border-0 shadow-sm flex-grow-1 question-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between mb-4 text-muted">
+                            <span>Question {{currentQuestionIndex + 1}} of {{questions.length}}</span>
+                            <span>Marks: {{questions[currentQuestionIndex].marks}}</span>
+                        </div>
+
+                        <h4 class="mb-4">{{questions[currentQuestionIndex].questionText}}</h4>
+
+                        @if (questions[currentQuestionIndex].questionType === 'mcq') {
+                        <div class="options-list d-flex flex-column gap-3">
+                            @for (option of questions[currentQuestionIndex].options; track option) {
+                            <label
+                                class="option-item p-3 border rounded d-flex align-items-center gap-3 cursor-pointer hover-bg-light">
+                                <input type="radio" name="answer" [value]="option"
+                                    [(ngModel)]="answers[questions[currentQuestionIndex].id!]" class="form-check-input"
+                                    style="transform: scale(1.2);">
+                                <span>{{option}}</span>
+                            </label>
+                            }
+                        </div>
+                        } @else {
+                        <textarea class="form-control" rows="6"
+                            [(ngModel)]="answers[questions[currentQuestionIndex].id!]"
+                            placeholder="Type your answer here..."></textarea>
+                        }
+                    </div>
+                    <div class="card-footer bg-white border-0 p-3 d-flex justify-content-between">
+                        <button class="btn btn-secondary px-4" (click)="prevQuestion()"
+                            [disabled]="currentQuestionIndex === 0">
+                            <i class="bi bi-arrow-left me-1"></i> Previous
+                        </button>
+
+                        @if (currentQuestionIndex === questions.length - 1) {
+                        <button class="btn btn-success px-4" (click)="submitExam()">
+                            Submit <i class="bi bi-check-lg ms-1"></i>
+                        </button>
+                        } @else {
+                        <button class="btn btn-primary px-4" (click)="nextQuestion()">
+                            Next <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Palette -->
+            <div class="col-lg-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white fw-bold">Question Palette</div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2">
+                            @for (q of questions; track q.id; let i = $index) {
+                            <button class="btn btn-sm" [class.btn-primary]="currentQuestionIndex === i"
+                                [class.btn-outline-primary]="currentQuestionIndex !== i && !answers[q.id!]"
+                                [class.btn-success]="currentQuestionIndex !== i && answers[q.id!]"
+                                style="width: 40px; height: 40px;" (click)="currentQuestionIndex = i">
+                                {{i + 1}}
+                            </button>
+                            }
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white small text-muted">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge bg-primary rounded-circle p-1" style="width: 10px; height: 10px;"></span>
+                            Current
+                        </div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge bg-success rounded-circle p-1" style="width: 10px; height: 10px;"></span>
+                            Answered
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge border border-primary text-primary rounded-circle p-1"
+                                style="width: 10px; height: 10px;"></span> Not Answered
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+}

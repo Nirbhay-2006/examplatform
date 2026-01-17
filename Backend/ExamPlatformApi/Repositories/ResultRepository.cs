@@ -38,4 +38,9 @@ public class ResultRepository : IResultRepository
     {
         return await _results.Find(r => r.StudentId == studentId).ToListAsync();
     }
+
+    public async Task<List<Result>> GetByExamIdAsync(string examId)
+    {
+        return await _results.Find(r => r.ExamId == examId).ToListAsync();
+    }
 }
