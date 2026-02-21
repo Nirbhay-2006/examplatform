@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "E:\\sem6\\ExamPlatform\\ExamNest.csproj": {}
+    "E:\\ExamPlatform\\examplatform\\ExamNest.csproj": {}
   },
   "projects": {
-    "E:\\sem6\\ExamPlatform\\ExamNest.csproj": {
+    "E:\\ExamPlatform\\examplatform\\ExamNest.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\sem6\\ExamPlatform\\ExamNest.csproj",
+        "projectUniqueName": "E:\\ExamPlatform\\examplatform\\ExamNest.csproj",
         "projectName": "ExamNest",
-        "projectPath": "E:\\sem6\\ExamPlatform\\ExamNest.csproj",
+        "projectPath": "E:\\ExamPlatform\\examplatform\\ExamNest.csproj",
         "packagesPath": "C:\\Users\\dell\\.nuget\\packages\\",
-        "outputPath": "E:\\sem6\\ExamPlatform\\obj\\",
+        "outputPath": "E:\\ExamPlatform\\examplatform\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -50,9 +50,43 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "BCrypt.Net-Next": {
+              "target": "Package",
+              "version": "[4.0.3, )"
+            },
+            "Google.Apis.Auth": {
+              "target": "Package",
+              "version": "[1.69.0, )"
+            },
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[8.0.24, )"
+            },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[9.0.12, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[9.0.11, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.12, )"
+            },
+            "Microsoft.IdentityModel.Tokens": {
+              "target": "Package",
+              "version": "[8.16.0, )"
+            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.6.2, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[8.16.0, )"
             }
           },
           "imports": [
