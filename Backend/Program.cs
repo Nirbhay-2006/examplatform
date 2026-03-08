@@ -81,6 +81,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<IGoogleTokenValidator, GoogleTokenValidator>();
 builder.Services.AddScoped<AdminServices>();
+builder.Services.AddScoped<IExamAntiCheatingService, ExamAntiCheatingService>();
 
 
 var app = builder.Build();

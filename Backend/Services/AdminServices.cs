@@ -23,10 +23,28 @@ namespace ExamNest.Services
                 .ToListAsync();
         }
 
+        public async Task<List<User>> GetAllTeacher()
+        {
+            return await GetAllAsync();
+        }
+
+        public async Task<List<User>> GetAllStudent()
+        {
+            return await _context.Users
+                .Where(u => u.RoleId == 3)
+                .ToListAsync();
+        }
+
         public async Task<User?> GetByIdAsync(int id)
         {
             return await _context.Users
                 .FirstOrDefaultAsync(u => u.UserId == id && u.RoleId == 2);
+        }
+
+        public async Task<User?> GetByIdstuAsync(int id)
+        {
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.UserId == id && u.RoleId == 3);
         }
 
         public async Task<User> CreateAsync(UserCreateDTO dto)
@@ -72,6 +90,25 @@ namespace ExamNest.Services
             return true;
         }
 
+        public async Task<bool> UpdateStudentAsync(int id, UserUpdateDTO dto)
+        {
+            var student = await GetByIdstuAsync(id);
+            if (student == null) return false;
+
+            var newhaspsw = BCrypt.Net.BCrypt.HashPassword(dto.Newpassword);
+            student.FirstName = dto.FirstName;
+            student.MiddleName = dto.MiddleName;
+            student.LastName = dto.LastName;
+            student.Email = dto.Email;
+            student.PasswordHash = newhaspsw;
+            student.Phone = dto.Phone;
+            student.IsActive = dto.IsActive;
+            student.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
         public async Task<bool> DeleteAsync(int id)
         {
             var teacher = await GetByIdAsync(id);
@@ -82,16 +119,14 @@ namespace ExamNest.Services
             return true;
         }
 
+        public async Task<bool> DeleteStudentAsync(int id)
+        {
+            var student = await GetByIdstuAsync(id);
+            if (student == null) return false;
 
-
-
-
-
-
-
-
-
-
-
+            _context.Users.Remove(student);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

@@ -7,6 +7,26 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Repositories\**" />
+    <Compile Remove="**\* copy.cs" />
+    <Compile Remove="AdminServices.cs" />
+    <Compile Remove="AuthService.cs" />
+    <Compile Remove="GoogleTokenValidator.cs" />
+    <Compile Remove="IAuthService.cs" />
+    <Compile Remove="IEmailSender.cs" />
+    <Compile Remove="IGoogleTokenValidator.cs" />
+    <Compile Remove="SmtpEmailSender.cs" />
+    <Compile Remove="Student.cs" />
+    <Compile Remove="Models\AuthDtos.cs" />
+    <Compile Remove="Models\User\UserCreateDTO.cs" />
+    <Compile Remove="Models\User\UserResponseDTO.cs" />
+    <Compile Remove="Models\User\UserUpdateDTO.cs" />
+    <Content Remove="Repositories\**" />
+    <EmbeddedResource Remove="Repositories\**" />
+    <None Remove="Repositories\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Google.Apis.Auth" Version="1.69.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.24" />
@@ -23,7 +43,6 @@
 
   <ItemGroup>
     <Folder Include="Data\" />
-    <Folder Include="Repositories\" />
   </ItemGroup>
 
 </Project>

@@ -7,6 +7,15 @@ import { TeacherDashboard } from './teacher-dashboard/teacher-dashboard';
 import { StudentDashboard } from './student-dashboard/student-dashboard';
 import { Teachermain } from './teachermain/teachermain';
 import { Studentmain } from './studentmain/studentmain';
+import { Admindashboard } from './admindashboard/admindashboard';
+import { Teacherdash } from './teacherdash/teacherdash';
+import { Createcource } from './createcource/createcource';
+import { Owncourse } from './owncourse/owncourse';
+import { TeacherExamList } from './teacher-exam-list/teacher-exam-list';
+import { Mysubscriber } from './mysubscriber/mysubscriber';
+import { TeacherProfile } from './teacher-profile/teacher-profile';
+import { Studentmaindash } from './studentmaindash/studentmaindash';
+import { Publishedcourses } from './publishedcourses/publishedcourses';
 
 export const routes: Routes = [
 
@@ -21,6 +30,8 @@ export const routes: Routes = [
     path:'admin-dashboard',
     component:AdminDashboard,
     children:[
+      {path:'',component:Admindashboard},
+      {path:'Admin-Dashboard',component:Admindashboard},
       {path:'main-teacher',component:Teachermain},
       {path:'main-student',component:Studentmain}
     ]
@@ -29,11 +40,23 @@ export const routes: Routes = [
   {
     path:'teacher-dashboard',
     component:TeacherDashboard,
+    children:[
+      {path:'',component:Teacherdash},
+      {path:'create-couse',component:Createcource},
+      {path:'your-course',component:Owncourse},
+      {path:'exam-list',component:TeacherExamList},
+      {path:'my-subscriber',component:Mysubscriber},
+      {path:'profile',component:TeacherProfile},
+    ]
   },
-  // admin side
+  // student side
   {
     path:'student-dashboard',
     component:StudentDashboard,
+    children:[
+      {path:'',component:Studentmaindash},
+      {path:'published-courses',component:Publishedcourses},
+    ]
   }
 ];
 

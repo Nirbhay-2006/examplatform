@@ -20,8 +20,15 @@ namespace ExamNest.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllTeacher()
         {
-            var teachers = await _adminServices.GetAllAsync();
+            var teachers = await _adminServices.GetAllTeacher();
             return Ok(teachers);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllStudent()
+        {
+            var students = await _adminServices.GetAllStudent();
+            return Ok(students);
         }
 
         [HttpGet("{id}")]
@@ -57,6 +64,42 @@ namespace ExamNest.Controllers
             if (!result) return NotFound();
 
             return Ok("Teacher Deleted Successfully");
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(int id, UserUpdateDTO dto)
+        {
+            var result = await _adminServices.UpdateAsync(id, dto);
+            if (!result) return NotFound();
+
+            return Ok("Teacher Updated Successfully");
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateStudent(int id, UserUpdateDTO dto)
+        {
+            var result = await _adminServices.UpdateStudentAsync(id, dto);
+            if (!result) return NotFound();
+
+            return Ok("Student Updated Successfully");
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var result = await _adminServices.DeleteAsync(id);
+            if (!result) return NotFound();
+
+            return Ok("Deleted Successfully");
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteStudent(int id)
+        {
+            var result = await _adminServices.DeleteStudentAsync(id);
+            if (!result) return NotFound();
+
+            return Ok("Deleted Successfully");
         }
 
 
